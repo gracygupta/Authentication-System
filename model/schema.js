@@ -1,66 +1,46 @@
 const mongoose = require("mongoose");
-require("../db/conn");
+// require("../db/conn");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
-const { json } = require("body-parser");
-// const securePassword = async (password) => {
-//   const passwordHashed = await bcrypt.hash(password, 10);
-//   console.log(passwordHashed);
-// };
-// const passwordCheck = async (password) => {};
+var salt = bcrypt.genSaltSync(10);
 
 //defining structure
-const userSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
+const userSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Email Invalid");
+        }
+      },
+    },
+    nickname: {
+      type: String,
+      // required: true,
+      validate(value) {
+        if (validator.isEmpty(value)) {
+          throw new Error("Nickname is Required");
+        }
+      },
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
   },
-  nickname: {
-    type: String,
-    required: true,
-    // validate: [validator.notEmpty, "Email Required"],
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  role: {
-    type: String,
-    enum: ["user", "admin"],
-    default: "user",
-  },
-});
-
-//Hashing
-userSchema.pre("save", async function () {
-  if (this.isModified("password")) {
-    this.password = bcrypt.hash(this.password, 12);
-  }
-  // next();
-});
+  { timestamps: true }
+);
 
 //creating new collection
 const User = new mongoose.model("User", userSchema);
 
-// console.log("hi there");
-// User({
-//   email: "gracy@123.com",
-//   nickname: "gracy",
-//   password: "12345678",
-//   role: "user",
-// }).then(() => {
-//   console
-//     .log(
-//       json({
-//         message: "User Registered",
-//       })
-//     )
-//     .catch((e) => {
-//       if (!e) {
-//         console.log(json({ message: "Error" }));
-//       }
-//     });
-// });
-// //Exporting collection object
-// module.exports = User;
+// Exporting collection object
+module.exports = User;

@@ -211,32 +211,32 @@ const change_nickname = async (req, res) => {
 };
 
 //delete user->done by only admin
-// const delete_user = async (req, res) => {
-//   try {
-//     const admin = await User.findOne({ _id: req.userId });
-//     const user = await User.findOne({ email: req.params.email });
-//     if (user) {
-//       console.log(user);
-//       if (admin.role === "admin") {
-//         console.log(
-//           await User.deleteOne({ email: req.params.email }),
-//           "\n user deleted"
-//         );
+const delete_user = async (req, res) => {
+  try {
+    const admin = await User.findOne({ _id: req.userId });
+    const user = await User.findOne({ email: req.params.email });
+    if (user) {
+      console.log(user);
+      if (admin.role === "admin") {
+        console.log(
+          await User.deleteOne({ email: req.params.email }),
+          "\n user deleted"
+        );
 
-//         res.status(201).json({ message: "User Deleted" });
-//       } else {
-//         console.log("Unauthorized to delete");
-//         res.status(400).json({ error: "Unauthorized" });
-//       }
-//     } else {
-//       console.log("User not found");
-//       res.status(400).json({ message: "User not found" });
-//     }
-//   } catch (err) {
-//     console.log(err);
-//     res.status(500).json({ error: "Something went wrong!!" });
-//   }
-// };
+        res.status(201).json({ message: "User Deleted" });
+      } else {
+        console.log("Unauthorized to delete");
+        res.status(400).json({ error: "Unauthorized" });
+      }
+    } else {
+      console.log("User not found");
+      res.status(400).json({ message: "User not found" });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Something went wrong!!" });
+  }
+};
 
 //exporting for further user in other module
 module.exports = {

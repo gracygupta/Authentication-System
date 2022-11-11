@@ -238,6 +238,22 @@ const delete_user = async (req, res) => {
   }
 };
 
+//change the role from user to admin
+const change_role = async (req, res) => {
+  const user_email = req.params.email;
+  const user = await User.findOne({ email: user_email });
+  if (user) {
+    console.log(
+      await User.updateOne({ email: user_email }, { role: "admin" }),
+      "\nUser is authorized as an Admin"
+    );
+    res.status(201).json({ message: "User is authorized for admin's role" });
+  } else {
+    console.log("User not found");
+    res.status(400).json({ error: "User not found" });
+  }
+};
+
 //exporting for further user in other module
 module.exports = {
   register,
@@ -247,4 +263,5 @@ module.exports = {
   get_nickname,
   change_nickname,
   delete_user,
+  change_role,
 };

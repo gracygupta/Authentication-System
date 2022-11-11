@@ -54,7 +54,7 @@ app.post("/user/nickname", auth, AuthController.change_nickname);
 app.get("/admin/delete/:email", auth, AuthController.delete_user);
 
 //makes any user admin...accessible only to admin
-// app.get("admin/make_admin/:email");
+app.get("/admin/make_admin/:email", auth, AuthController.change_role);
 
 app.listen(port, "0.0.0.0", function () {
   console.log(`server is up at ${port}`);

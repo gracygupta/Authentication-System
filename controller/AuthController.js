@@ -2,7 +2,10 @@ const User = require("../model/schema");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const session = require("express-session");
+const { json } = require("body-parser");
 const SECRET_KEY = "AUTHORIZED";
+const oneDay = 1000 * 60 * 60 * 24;
 
 //Register controller and token generator
 const register = async (req, res) => {
@@ -63,13 +66,15 @@ const login = async (req, res) => {
         message: "Invalid Credentials",
       });
     }
-    sess = req.session;
-    sess.name = existingUser.nickname;
-    sess.email = existingUser.email;
     const token = jwt.sign(
       { email: existingUser.email, id: existingUser._id },
       SECRET_KEY
     );
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + oneDay),
+      httpOnly: true,
+    });
+
     res.status(201).json({
       user: {
         id: existingUser._id,
@@ -116,7 +121,7 @@ const resetEmail = async (req, res) => {
         subject: "Reset Password",
         text: " Do not share this link.",
         html:
-          '<p>Click <a href="http://150.50.1.184:8000/password/reset/' +
+          '<p>Click <a href="http://150.50.1.52:8000/password/reset/' +
           recovery_token +
           '">here</a> to reset your password</p>',
       };
@@ -172,7 +177,74 @@ const resetPassword = async (req, res) => {
 };
 
 //fetches nickname of logged in user only
-const get_nickname = async (req, res) => {};
+const get_nickname = async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.userId });
+    if (user) {
+      console.log("Nickname:", user.nickname);
+      res.status(201).json({
+        message: `Your nickname is ${user.nickname}`,
+      });
+    } else {
+      console.log("Error finding user");
+      res.status(400).json({
+        message: "Error finding user",
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+  }
+};
+
+//allows to change nickname -> authorized only to logged in user
+const change_nickname = async (req, res) => {
+  const new_nickname = req.body.nickname;
+  console.log(
+    await User.updateOne({ email: req.userEmail }, { nickname: new_nickname })
+  );
+  res.status(201).json({
+    message: `Nickname updated to ${new_nickname}`,
+  });
+};
+
+//delete user->done by only admin
+// const delete_user = async (req, res) => {
+//   try {
+//     const admin = await User.findOne({ _id: req.userId });
+//     const user = await User.findOne({ email: req.params.email });
+//     if (user) {
+//       console.log(user);
+//       if (admin.role === "admin") {
+//         console.log(
+//           await User.deleteOne({ email: req.params.email }),
+//           "\n user deleted"
+//         );
+
+//         res.status(201).json({ message: "User Deleted" });
+//       } else {
+//         console.log("Unauthorized to delete");
+//         res.status(400).json({ error: "Unauthorized" });
+//       }
+//     } else {
+//       console.log("User not found");
+//       res.status(400).json({ message: "User not found" });
+//     }
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({ error: "Something went wrong!!" });
+//   }
+// };
 
 //exporting for further user in other module
-module.exports = { register, login, resetEmail, resetPassword };
+module.exports = {
+  register,
+  login,
+  resetEmail,
+  resetPassword,
+  get_nickname,
+  change_nickname,
+  delete_user,
+};

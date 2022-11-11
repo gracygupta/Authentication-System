@@ -63,6 +63,9 @@ const login = async (req, res) => {
         message: "Invalid Credentials",
       });
     }
+    sess = req.session;
+    sess.name = existingUser.nickname;
+    sess.email = existingUser.email;
     const token = jwt.sign(
       { email: existingUser.email, id: existingUser._id },
       SECRET_KEY
@@ -91,10 +94,15 @@ const resetEmail = async (req, res) => {
     let user = await User.findOne({ email: req.body.email });
     if (!user) {
       console.log("User not found");
-      return res.send(400).json({
+      return res.status(400).json({
         message: "User not found",
       });
     } else {
+      //token creation
+      const recovery_token = jwt.sign(
+        { email: user.email, id: user._id },
+        SECRET_KEY
+      );
       let transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -105,18 +113,22 @@ const resetEmail = async (req, res) => {
       var mailOptions = {
         from: process.env.EMAIL,
         to: req.body.email,
-        subject: "Sending email",
-        text: "Hlo there",
+        subject: "Reset Password",
+        text: " Do not share this link.",
+        html:
+          '<p>Click <a href="http://150.50.1.184:8000/password/reset/' +
+          recovery_token +
+          '">here</a> to reset your password</p>',
       };
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
           console.log(error);
-          res.status(500).json({
+          return res.status(500).json({
             error: "An error occured",
           });
         } else {
           console.log("Email sent" + info.response);
-          res.status(201).json({
+          return res.status(201).json({
             status: "success",
             message: "Email sent successfully",
           });
@@ -132,16 +144,25 @@ const resetEmail = async (req, res) => {
 };
 
 //Reset password
-const resetPassword = async (re, res) => {
+const resetPassword = async (req, res) => {
   try {
-    console.log(req.body);
-    const { new_password } = req.body;
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    console.log(hashedPassword);
-    const user = await User.updateOne(
-      { email: email },
-      { password: hashedPassword }
-    );
+    if (req.body.pass === req.body.cpass) {
+      const hashedPassword = await bcrypt.hash(req.body.pass, 10);
+      const user = await User.updateOne(
+        { _id: req.userId },
+        { password: hashedPassword }
+      );
+      console.log(user);
+      console.log("Password changed");
+      res.status(201).json({
+        message: "Password Changed",
+      });
+    } else {
+      console.log("Password do not match");
+      res.status(400).json({
+        error: "Password do not match",
+      });
+    }
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -150,8 +171,8 @@ const resetPassword = async (re, res) => {
   }
 };
 
-//
-// const resetPassword = async (re, res) => {};
+//fetches nickname of logged in user only
+const get_nickname = async (req, res) => {};
 
 //exporting for further user in other module
 module.exports = { register, login, resetEmail, resetPassword };

@@ -4,12 +4,13 @@ const SECRET_KEY = "AUTHORIZED";
 const auth = (req, res, next) => {
   try {
     let token = req.params.token || req.cookies.token;
+    console.log(token);
     if (token) {
       let user = jwt.verify(token, SECRET_KEY);
       if (user) {
         req.userId = user.id;
         req.userEmail = user.email;
-        console.log("User Authorized");
+        console.log("User Authorized", req.userEmail);
       }
     } else {
       console.log("Unauthorized User");

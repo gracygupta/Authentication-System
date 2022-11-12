@@ -1,5 +1,6 @@
 //requirements
 const express = require("express");
+
 const bodyParser = require("body-parser");
 const nodemailer = require("nodemailer");
 const cookieParser = require("cookie-parser");
@@ -17,6 +18,7 @@ app.use((req, res, next) => {
 });
 
 const AuthController = require("./controller/AuthController");
+const User = require("./model/schema");
 
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -33,8 +35,19 @@ app.get("/login", function (req, res) {
 //for login with authentification
 app.post("/login", AuthController.login);
 
+app.get("/profile", auth, async function (req, res) {
+  const user = await User.findOne({ _id: req.userId });
+  res.render("profile", {
+    email: user.email,
+    role: user.role,
+    name: "",
+  });
+});
+
+app.get("/password/reset", auth, AuthController.resetEmail);
+
 //password reset email sender
-app.post("/password/reset", AuthController.resetEmail);
+app.post("/password/reset", auth, AuthController.resetEmail);
 
 //serve reset password page
 app.get("/password/reset/:token", function (req, res) {

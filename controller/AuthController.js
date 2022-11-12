@@ -13,9 +13,14 @@ const register = async (req, res) => {
     console.log(req.body);
     const existingUser = await User.findOne({ email: req.body.email });
     if (existingUser) {
-      return res.status(400).json({
-        message: "User already exist",
+      res.render("error", {
+        message_1: "OOPS!",
+        message_2: "User already exist",
+        brace: "(",
       });
+      // return res.status(400).json({
+      //   message: "User already exist",
+      // });
     }
     if (req.body.password === req.body.cpassword) {
       const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -39,16 +44,26 @@ const register = async (req, res) => {
       //   message: "User registered successfully",
       // });
     } else {
-      res.status(400).json({
-        message: "Password does not match",
+      res.render("error", {
+        message_1: "SORRY!",
+        message_2: "Password do not match",
+        brace: "(",
       });
+      // res.status(400).json({
+      //   message: "Password does not match",
+      // });
     }
   } catch (err) {
     console.log(err);
-    res.status(500).json({
-      error: err,
-      message: "Something went wrong",
+    res.render("error", {
+      message_1: "OOPS!",
+      message_2: "Something went wrong",
+      brace: "(",
     });
+    // res.status(500).json({
+    //   error: err,
+    //   message: "Something went wrong",
+    // });
   }
 };
 
@@ -59,15 +74,25 @@ const login = async (req, res) => {
   try {
     const existingUser = await User.findOne({ email: email });
     if (!existingUser) {
-      return res.status(400).json({
-        message: "User not found",
+      res.render("error", {
+        message_1: "OOPS!",
+        message_2: "User not found",
+        brace: "(",
       });
+      // return res.status(400).json({
+      //   message: "User not found",
+      // });
     }
     const matchPassword = await bcrypt.compare(password, existingUser.password);
     if (!matchPassword) {
-      return res.status(400).json({
-        message: "Invalid Credentials",
+      res.render("error", {
+        message_1: "SORRY!",
+        message_2: "Invalid Credentials",
+        brace: "(",
       });
+      // return res.status(400).json({
+      //   message: "Invalid Credentials",
+      // });
     }
     const token = jwt.sign(
       { email: existingUser.email, id: existingUser._id },
@@ -93,23 +118,34 @@ const login = async (req, res) => {
     // });
   } catch (err) {
     console.log(err);
-    res.status(500).json({
-      error: err,
-      message: "Something went wrong",
+    res.render("error", {
+      message_1: "OOPS!",
+      message_2: "Something went wrong",
+      brace: "(",
     });
+    // res.status(500).json({
+    //   error: err,
+    //   message: "Something went wrong",
+    // });
   }
 };
 
 //Send email for password reset
 const resetEmail = async (req, res) => {
-  const { email } = req.body;
+  const email = req.body.email || req.userEmail;
+  console.log(req.userId, req.userEmail);
   try {
-    let user = await User.findOne({ email: req.body.email });
+    let user = await User.findOne({ email: email });
     if (!user) {
       console.log("User not found");
-      return res.status(400).json({
-        message: "User not found",
+      res.render("error", {
+        message_1: "OOPS!",
+        message_2: "User not found",
+        brace: "(",
       });
+      // return res.status(400).json({
+      //   message: "User not found",
+      // });
     } else {
       //token creation
       const recovery_token = jwt.sign(
@@ -125,7 +161,7 @@ const resetEmail = async (req, res) => {
       });
       var mailOptions = {
         from: process.env.EMAIL,
-        to: req.body.email,
+        to: email,
         subject: "Reset Password",
         text: " Do not share this link.",
         html:
@@ -136,23 +172,34 @@ const resetEmail = async (req, res) => {
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
           console.log(error);
-          return res.status(500).json({
-            error: "An error occured",
+          res.render("error", {
+            message_1: "OOPS!",
+            message_2: "An error occured",
+            brace: "(",
           });
+          // return res.status(500).json({
+          //   error: "An error occured",
+          // });
         } else {
           console.log("Email sent" + info.response);
-          return res.status(201).json({
-            status: "success",
-            message: "Email sent successfully",
-          });
+          res.render("success", { message: "Email sent successfully" });
+          // return res.status(201).json({
+          //   status: "success",
+          //   message: "Email sent successfully",
+          // });
         }
       });
     }
   } catch (err) {
     console.log(err);
-    res.status(500).json({
-      error: "Something went wrong",
+    res.render("error", {
+      message_1: "OOPS!",
+      message_2: "Something went wrong",
+      brace: "(",
     });
+    // res.status(500).json({
+    //   error: "Something went wrong",
+    // });
   }
 };
 
@@ -190,32 +237,48 @@ const get_nickname = async (req, res) => {
     const user = await User.findOne({ _id: req.userId });
     if (user) {
       console.log("Nickname:", user.nickname);
-      res.status(201).json({
-        message: `Your nickname is ${user.nickname}`,
+      res.render("profile", {
+        name: user.nickname,
+        email: user.email,
+        role: user.role,
       });
+      // res.status(201).json({
+      //   message: `Your nickname is ${user.nickname}`,
+      // });
     } else {
       console.log("Error finding user");
-      res.status(400).json({
-        message: "Error finding user",
+      res.render("error", {
+        message_1: "SORRY",
+        message_2: "Error finding user",
+        brace: "(",
       });
+      // res.status(400).json({
+      //   message: "Error finding user",
+      // });
     }
   } catch (err) {
     console.log(err);
-    res.status(500).json({
-      message: "Something went wrong",
+    res.render("error", {
+      message_1: "OOPS!",
+      message_2: "Something went wrong",
+      brace: "(",
     });
+    // res.status(500).json({
+    //   message: "Something went wrong",
+    // });
   }
 };
 
 //allows to change nickname -> authorized only to logged in user
 const change_nickname = async (req, res) => {
-  const new_nickname = req.body.nickname;
+  const new_nickname = req.body.new_nickname;
   console.log(
     await User.updateOne({ email: req.userEmail }, { nickname: new_nickname })
   );
-  res.status(201).json({
-    message: `Nickname updated to ${new_nickname}`,
-  });
+  res.redirect("/user/nickname");
+  // res.status(201).json({
+  //   message: `Nickname updated to ${new_nickname}`,
+  // });
 };
 
 //delete user->done by only admin

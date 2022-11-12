@@ -10,6 +10,7 @@ const oneDay = 1000 * 60 * 60 * 24;
 //Register controller and token generator
 const register = async (req, res) => {
   try {
+    console.log(req.body);
     const existingUser = await User.findOne({ email: req.body.email });
     if (existingUser) {
       return res.status(400).json({
@@ -24,18 +25,19 @@ const register = async (req, res) => {
         role: req.body.role,
         password: hashedPassword,
       });
-      console.log(user);
-      const token = jwt.sign({ email: user.email, id: user._id }, SECRET_KEY);
-      res.status(201).json({
-        user: {
-          id: user._id,
-          email: user.email,
-          nickname: user.nickname,
-          role: user.role,
-        },
-        token: token,
-        message: "User registered successfully",
-      });
+      console.log("User Added", user);
+      req.message = "User registered";
+      res.render("login", { message: "User Registered. Please login here!" });
+      // res.status(201).json({
+      //   user: {
+      //     id: user._id,
+      //     email: user.email,
+      //     nickname: user.nickname,
+      //     role: user.role,
+      //   },
+      //   token: token,
+      //   message: "User registered successfully",
+      // });
     } else {
       res.status(400).json({
         message: "Password does not match",
@@ -53,8 +55,9 @@ const register = async (req, res) => {
 //Login controller and token generator
 const login = async (req, res) => {
   const { email, password } = req.body;
+  console.log(req.body);
   try {
-    const existingUser = await User.findOne({ email: req.body.email });
+    const existingUser = await User.findOne({ email: email });
     if (!existingUser) {
       return res.status(400).json({
         message: "User not found",
@@ -74,15 +77,20 @@ const login = async (req, res) => {
       expires: new Date(Date.now() + oneDay),
       httpOnly: true,
     });
-
-    res.status(201).json({
-      user: {
-        id: existingUser._id,
-        email: existingUser.email,
-        nickname: existingUser.nickname,
-      },
-      token: token,
+    res.render("profile", {
+      name: existingUser.nickname,
+      email: existingUser.email,
+      role: existingUser.role,
     });
+
+    // res.status(201).json({
+    //   user: {
+    //     id: existingUser._id,
+    //     email: existingUser.email,
+    //     nickname: existingUser.nickname,
+    //   },
+    //   token: token,
+    // });
   } catch (err) {
     console.log(err);
     res.status(500).json({
@@ -224,9 +232,10 @@ const delete_user = async (req, res) => {
         );
 
         res.status(201).json({ message: "User Deleted" });
+        res.clearCookie("token");
       } else {
         console.log("Unauthorized to delete");
-        res.status(400).json({ error: "Unauthorized" });
+        res.status(400).json({ error: "Not Authorized to do that" });
       }
     } else {
       console.log("User not found");
@@ -242,15 +251,21 @@ const delete_user = async (req, res) => {
 const change_role = async (req, res) => {
   const user_email = req.params.email;
   const user = await User.findOne({ email: user_email });
-  if (user) {
-    console.log(
-      await User.updateOne({ email: user_email }, { role: "admin" }),
-      "\nUser is authorized as an Admin"
-    );
-    res.status(201).json({ message: "User is authorized for admin's role" });
+  const admin = await User.findOne({ _id: req.userId });
+  if (admin.role === "admin") {
+    if (user) {
+      console.log(
+        await User.updateOne({ email: user_email }, { role: "" }),
+        "\nUser is authorized as an Admin"
+      );
+      res.status(201).json({ message: "User is authorized for admin's role" });
+    } else {
+      console.log("User not found");
+      res.status(400).json({ error: "User not found" });
+    }
   } else {
-    console.log("User not found");
-    res.status(400).json({ error: "User not found" });
+    console.log("Unauthorized");
+    res.status(400).json({ message: "Not Authorized to do that" });
   }
 };
 

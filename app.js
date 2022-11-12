@@ -21,15 +21,15 @@ const AuthController = require("./controller/AuthController");
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
-
-app.get("/", async function (req, res) {
-  console.log(req.cookies.token);
-  return res.status(200).json({ message: "Logged in" });
+app.get("/signup", function (req, res) {
+  res.render("signup");
 });
-
 //for getting register
 app.post("/signup", AuthController.register);
 
+app.get("/login", function (req, res) {
+  res.sendFile(__dirname + "/html/login.html");
+});
 //for login with authentification
 app.post("/login", AuthController.login);
 

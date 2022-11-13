@@ -240,6 +240,7 @@
                         >Reset Password</a
                       >
                     </button>
+                    <span style="border-left: 1px solid #adb5bd"></span>
                     <button type="submit" class="btn btn-lg btn-block">
                       <a
                         href="/user/nickname"
@@ -247,7 +248,7 @@
                         >Get Nickname</a
                       >
                     </button>
-                    <br />
+                    <hr />
                     <form action="/user/nickname" method="post">
                       <input
                         type="text"
@@ -264,21 +265,48 @@
                       >
                         Change Nickname
                       </button>
-                      <br />
-                      <button type="submit" class="btn btn-lg btn-block">
-                        <a
-                          href="/user/nickname"
-                          style="text-decoration: none; color: white"
-                          >Get Nickname</a
+                      </form>
+                      <hr />
+
+                      <% if(role === "admin"){ %>
+                      <form action="/delete" method="get">
+                        <input
+                          type="text"
+                          id="form1Example13"
+                          class="form-control form-control-lg"
+                          name="email"
+                          style="font-size: 0.75rem"
+                          placeholder="Enter email to delete user"
+                        />
+                        <button
+                          type="submit"
+                          class="btn btn-lg btn-block"
+                          style="color: white"
                         >
-                      </button>
-                      <button type="submit" class="btn btn-lg btn-block">
-                        <a
-                          href="/user/nickname"
-                          style="text-decoration: none; color: white"
-                          >Get Nickname</a
+                          Delete User
+                        </button>
+                      </form>
+                      <hr />
+
+                      <form action="/make_admin" method="get">
+                        <input
+                          type="text"
+                          id="form1Example13"
+                          class="form-control form-control-lg"
+                          name="email"
+                          style="font-size: 0.75rem"
+                          placeholder="Enter email to make admin"
+                        />
+                        <button
+                          type="submit"
+                          class="btn btn-lg btn-block"
+                          style="color: white"
                         >
-                      </button>
+                        Make Admin
+                        </button>
+                      </form>
+
+                      <% } %>
                     </form>
                   </div>
                 </div>

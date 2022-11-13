@@ -102,11 +102,7 @@ const login = async (req, res) => {
       expires: new Date(Date.now() + oneDay),
       httpOnly: true,
     });
-    res.render("profile", {
-      name: existingUser.nickname,
-      email: existingUser.email,
-      role: existingUser.role,
-    });
+    res.redirect("/profile");
 
     // res.status(201).json({
     //   user: {
@@ -133,7 +129,7 @@ const login = async (req, res) => {
 //Send email for password reset
 const resetEmail = async (req, res) => {
   const email = req.body.email || req.userEmail;
-  console.log(req.userId, req.userEmail);
+  console.log(req.userId, req.userEmail, email);
   try {
     let user = await User.findOne({ email: email });
     if (!user) {
@@ -293,20 +289,27 @@ const delete_user = async (req, res) => {
           await User.deleteOne({ email: req.params.email }),
           "\n user deleted"
         );
+        res.render("success", { message: "User Deleted" });
 
-        res.status(201).json({ message: "User Deleted" });
-        res.clearCookie("token");
+        // res.status(201).json({ message: "User Deleted" });
       } else {
         console.log("Unauthorized to delete");
-        res.status(400).json({ error: "Not Authorized to do that" });
+        res.render("error", {
+          message_1: "SORRY!",
+          message_2: "Not Authorized to do that",
+          brace: "(",
+        });
+        // res.status(400).json({ error: "Not Authorized to do that" });
       }
-    } else {
-      console.log("User not found");
-      res.status(400).json({ message: "User not found" });
     }
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: "Something went wrong!!" });
+    res.render("error", {
+      message_1: "OOPS!",
+      message_2: "Something went wrong",
+      brace: "(",
+    });
+    // res.status(500).json({ error: "Something went wrong!!" });
   }
 };
 
@@ -318,17 +321,29 @@ const change_role = async (req, res) => {
   if (admin.role === "admin") {
     if (user) {
       console.log(
-        await User.updateOne({ email: user_email }, { role: "" }),
+        await User.updateOne({ email: user_email }, { role: "admin" }),
         "\nUser is authorized as an Admin"
       );
-      res.status(201).json({ message: "User is authorized for admin's role" });
+      res.render("success", { message: "User is authorized for admin's role" });
+
+      // res.status(201).json({ message: "User is authorized for admin's role" });
     } else {
       console.log("User not found");
-      res.status(400).json({ error: "User not found" });
+      res.render("error", {
+        message_1: "OOPS!",
+        message_2: "User not found",
+        brace: "(",
+      });
+      // res.status(400).json({ error: "User not found" });
     }
   } else {
     console.log("Unauthorized");
-    res.status(400).json({ message: "Not Authorized to do that" });
+    res.render("error", {
+      message_1: "SORRY!",
+      message_2: "Not Authorized to do that",
+      brace: "(",
+    });
+    // res.status(400).json({ message: "Not Authorized to do that" });
   }
 };
 

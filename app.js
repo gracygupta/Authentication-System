@@ -63,8 +63,15 @@ app.get("/user/nickname", auth, AuthController.get_nickname);
 //sets new nickname...accessible by logged in user only
 app.post("/user/nickname", auth, AuthController.change_nickname);
 
+app.get("/delete", auth, function (req, res) {
+  res.redirect(`/admin/delete/${req.query.email}`);
+});
 //deletes the user...accessible only to user
 app.get("/admin/delete/:email", auth, AuthController.delete_user);
+
+app.get("/make_admin", function (req, res) {
+  res.redirect(`/admin/make_admin/${req.query.email}`);
+});
 
 //makes any user admin...accessible only to admin
 app.get("/admin/make_admin/:email", auth, AuthController.change_role);

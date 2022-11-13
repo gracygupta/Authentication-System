@@ -161,7 +161,7 @@ const resetEmail = async (req, res) => {
         subject: "Reset Password",
         text: " Do not share this link.",
         html:
-          '<p>Click <a href="http://150.50.1.52:8000/password/reset/' +
+          '<p>Click <a href="http://150.50.0.150:8000/password/reset/' +
           recovery_token +
           '">here</a> to reset your password</p>',
       };
@@ -210,20 +210,31 @@ const resetPassword = async (req, res) => {
       );
       console.log(user);
       console.log("Password changed");
-      res.status(201).json({
-        message: "Password Changed",
-      });
+      res.render("success", { message: "Password changed" });
+      // res.status(201).json({
+      //   message: "Password Changed",
+      // });
     } else {
       console.log("Password do not match");
-      res.status(400).json({
-        error: "Password do not match",
+      res.render("error", {
+        message_1: "OOPS!",
+        message_2: "Password do not match",
+        brace: "(",
       });
+      // res.status(400).json({
+      //   error: "Password do not match",
+      // });
     }
   } catch (err) {
     console.log(err);
-    res.status(500).json({
-      error: "Something went wrong",
+    res.render("error", {
+      message_1: "OOPS!",
+      message_2: "Something went wrong",
+      brace: "(",
     });
+    // res.status(500).json({
+    //   error: "Something went wrong",
+    // });
   }
 };
 

@@ -94,6 +94,7 @@ const login = async (req, res) => {
       //   message: "Invalid Credentials",
       // });
     }
+    User.update({ email: existingUser }, { last_logged_in: Date.now() });
     const token = jwt.sign(
       { email: existingUser.email, id: existingUser._id },
       SECRET_KEY
@@ -210,6 +211,10 @@ const resetPassword = async (req, res) => {
       );
       console.log(user);
       console.log("Password changed");
+      res.cookie("token", req.params.token, {
+        expires: new Date(Date.now() + oneDay),
+        httpOnly: true,
+      });
       res.render("success", { message: "Password changed" });
       // res.status(201).json({
       //   message: "Password Changed",

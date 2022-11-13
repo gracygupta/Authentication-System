@@ -10,14 +10,19 @@ const auth = (req, res, next) => {
         req.userId = user.id;
         req.userEmail = user.email;
         console.log("User Authorized");
+        next();
       }
     } else {
       console.log("Unauthorized User");
-      return res.status(401).json({
-        message: "Unauthorized User",
+      return res.render("error", {
+        message_1: "Unauthorized!",
+        message_2: "Please try to login again",
+        brace: "(",
       });
+      // return res.status(401).json({
+      //   message: "Unauthorized User",
+      // });
     }
-    next();
   } catch (err) {
     console.log(err);
     res.status(500).json({

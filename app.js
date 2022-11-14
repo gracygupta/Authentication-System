@@ -23,6 +23,8 @@ const User = require("./model/schema");
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
+
+//serves signup page
 app.get("/signup", function (req, res) {
   res.render("signup");
 });
@@ -32,6 +34,7 @@ app.post("/signup", AuthController.register);
 app.get("/login", function (req, res) {
   res.sendFile(__dirname + "/html/login.html");
 });
+
 //for login with authentification
 app.post("/login", AuthController.login);
 

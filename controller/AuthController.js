@@ -2,7 +2,6 @@ const User = require("../model/schema");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
-const session = require("express-session");
 const { json } = require("body-parser");
 const SECRET_KEY = "AUTHORIZED";
 const oneDay = 1000 * 60 * 60 * 24;
@@ -162,7 +161,7 @@ const resetEmail = async (req, res) => {
         subject: "Reset Password",
         text: " Do not share this link.",
         html:
-          '<p>Click <a href="http://150.50.0.150:8000/password/reset/' +
+          '<p>Click <a href="http://192.168.43.177:8000/password/reset/' +
           recovery_token +
           '">here</a> to reset your password</p>',
       };

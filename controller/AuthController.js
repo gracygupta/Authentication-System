@@ -29,9 +29,10 @@ const register = async (req, res) => {
         role: req.body.role,
         password: hashedPassword,
       });
-      console.log("User Added", user);
+      console.log("User Added");
       req.message = "User registered";
-      res.render("login", { message: "User Registered. Please login here!" });
+      res.redirect("/login?message=User Registered. Please login here!");
+      // res.render("login", { message: "User Registered. Please login here!" });
       // res.status(201).json({
       //   user: {
       //     id: user._id,
@@ -69,7 +70,6 @@ const register = async (req, res) => {
 //Login controller and token generator
 const login = async (req, res) => {
   const { email, password } = req.body;
-  console.log(req.body);
   try {
     const existingUser = await User.findOne({ email: email });
     if (!existingUser) {
@@ -161,7 +161,7 @@ const resetEmail = async (req, res) => {
         subject: "Reset Password",
         text: " Do not share this link.",
         html:
-          '<p>Click <a href="http://192.168.43.177:8000/password/reset/' +
+          '<p>Click <a href="http://192.168.88.244:8000/password/reset/' +
           recovery_token +
           '">here</a> to reset your password</p>',
       };
@@ -210,11 +210,7 @@ const resetPassword = async (req, res) => {
       );
       console.log(user);
       console.log("Password changed");
-      res.cookie("token", req.params.token, {
-        expires: new Date(Date.now() + oneDay),
-        httpOnly: true,
-      });
-      res.render("success", { message: "Password changed" });
+      res.render("login", { message: "Password changed. You can login here!" });
       // res.status(201).json({
       //   message: "Password Changed",
       // });
@@ -298,15 +294,19 @@ const delete_user = async (req, res) => {
     const admin = await User.findOne({ _id: req.userId });
     const user = await User.findOne({ email: req.params.email });
     if (user) {
-      console.log(user);
       if (admin.role === "admin") {
-        console.log(
-          await User.deleteOne({ email: req.params.email }),
-          "\n user deleted"
-        );
-        res.render("success", { message: "User Deleted" });
+        if (admin.email === req.params.email) {
+          await User.deleteOne({ email: req.params.email });
+          res.redirect("/login?message=Account Deleted");
+        } else {
+          console.log(
+            await User.deleteOne({ email: req.params.email }),
+            "\n user deleted"
+          );
+          res.render("success", { message: "User Deleted" });
 
-        // res.status(201).json({ message: "User Deleted" });
+          // res.status(201).json({ message: "User Deleted" });
+        }
       } else {
         console.log("Unauthorized to delete");
         res.render("error", {

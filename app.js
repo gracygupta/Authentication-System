@@ -10,7 +10,6 @@ const auth = require("./middleware/auth");
 
 const app = express();
 app.set("view engine", "ejs");
-app.use(cookieParser());
 app.use((req, res, next) => {
   console.log("redirecting to ->");
   console.log("HTTP Method = " + req.method + " URL = " + req.url);
@@ -32,7 +31,13 @@ app.get("/signup", function (req, res) {
 app.post("/signup", AuthController.register);
 
 app.get("/login", function (req, res) {
-  res.sendFile(__dirname + "/html/login.html");
+  message = req.query.message;
+  if (message) {
+    res.render("login", { message: message });
+  } else {
+    res.render("login", { message: "" });
+  }
+  // res.sendFile(__dirname + "/html/login.html");
 });
 
 //for login with authentification

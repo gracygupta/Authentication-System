@@ -13,7 +13,7 @@ const register = async (req, res) => {
     console.log(req.body);
     const existingUser = await User.findOne({ email: req.body.email });
     if (existingUser) {
-      if (api) {
+      if (api === true) {
         return res.status(400).json({
           message: "User already exist",
         });
@@ -34,7 +34,7 @@ const register = async (req, res) => {
         password: hashedPassword,
       });
       console.log("User Added");
-      if (api) {
+      if (api === true) {
         res.status(201).json({
           user: {
             id: user._id,
@@ -49,7 +49,7 @@ const register = async (req, res) => {
         res.redirect("/login?message=User Registered. Please login here!");
       }
     } else {
-      if (api) {
+      if (api === true) {
         res.status(400).json({
           message: "Password does not match",
         });
@@ -63,7 +63,7 @@ const register = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    if (api) {
+    if (api === true) {
       res.status(500).json({
         error: err,
         message: "Something went wrong",
@@ -84,7 +84,7 @@ const login = async (req, res) => {
   try {
     const existingUser = await User.findOne({ email: email });
     if (!existingUser) {
-      if (api) {
+      if (api === true) {
         return res.status(400).json({
           message: "User not found",
         });
@@ -98,7 +98,7 @@ const login = async (req, res) => {
     }
     const matchPassword = await bcrypt.compare(password, existingUser.password);
     if (!matchPassword) {
-      if (api) {
+      if (api === true) {
         return res.status(400).json({
           message: "Invalid Credentials",
         });
@@ -119,7 +119,7 @@ const login = async (req, res) => {
       expires: new Date(Date.now() + oneDay),
       httpOnly: true,
     });
-    if (api) {
+    if (api === true) {
       res.status(201).json({
         user: {
           id: existingUser._id,
@@ -133,7 +133,7 @@ const login = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    if (api) {
+    if (api === true) {
       res.status(500).json({
         error: err,
         message: "Something went wrong",
@@ -156,7 +156,7 @@ const resetEmail = async (req, res) => {
     let user = await User.findOne({ email: email });
     if (!user) {
       console.log("User not found");
-      if (api) {
+      if (api === true) {
         return res.status(400).json({
           message: "User not found",
         });
@@ -194,7 +194,7 @@ const resetEmail = async (req, res) => {
         if (error) {
           console.log(error);
 
-          if (api) {
+          if (api === true) {
             return res.status(500).json({
               error: "An error occured",
             });
@@ -207,7 +207,7 @@ const resetEmail = async (req, res) => {
           }
         } else {
           console.log("Email sent" + info.response);
-          if (api) {
+          if (api === true) {
             return res.status(201).json({
               status: "success",
               message: "Email sent successfully",
@@ -220,7 +220,7 @@ const resetEmail = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    if (api) {
+    if (api === true) {
       res.render("error", {
         message_1: "OOPS!",
         message_2: "Something went wrong",
@@ -245,7 +245,7 @@ const resetPassword = async (req, res) => {
       );
       console.log(user);
       console.log("Password changed");
-      if (api) {
+      if (api === true) {
         res.status(201).json({
           message: "Password Changed",
         });
@@ -256,7 +256,7 @@ const resetPassword = async (req, res) => {
       }
     } else {
       console.log("Password do not match");
-      if (api) {
+      if (api === true) {
         res.status(400).json({
           error: "Password do not match",
         });
@@ -270,7 +270,7 @@ const resetPassword = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    if (api) {
+    if (api === true) {
       res.status(500).json({
         error: "Something went wrong",
       });
@@ -291,7 +291,7 @@ const get_nickname = async (req, res) => {
     if (user) {
       console.log("Nickname:", user.nickname);
 
-      if (api) {
+      if (api === true) {
         res.status(201).json({
           message: `Your nickname is ${user.nickname}`,
         });
@@ -304,7 +304,7 @@ const get_nickname = async (req, res) => {
       }
     } else {
       console.log("Error finding user");
-      if (api) {
+      if (api === true) {
         res.status(400).json({
           message: "Error finding user",
         });
@@ -318,7 +318,7 @@ const get_nickname = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    if (api) {
+    if (api === true) {
       res.status(500).json({
         message: "Something went wrong",
       });
@@ -338,7 +338,7 @@ const change_nickname = async (req, res) => {
   console.log(
     await User.updateOne({ email: req.userEmail }, { nickname: new_nickname })
   );
-  if (api) {
+  if (api === true) {
     res.status(201).json({
       message: `Nickname updated to ${new_nickname}`,
     });
@@ -356,7 +356,7 @@ const delete_user = async (req, res) => {
       if (admin.role === "admin") {
         if (admin.email === req.params.email) {
           await User.deleteOne({ email: req.params.email });
-          if (api) {
+          if (api === true) {
             return res.status(201).json({ message: "User Deleted" });
           } else {
             res.redirect("/login?message=Account Deleted");
@@ -366,7 +366,7 @@ const delete_user = async (req, res) => {
             await User.deleteOne({ email: req.params.email }),
             "\n user deleted"
           );
-          if (api) {
+          if (api === true) {
             res.status(201).json({ message: "User Deleted" });
           } else {
             res.render("success", { message: "User Deleted" });
@@ -374,7 +374,7 @@ const delete_user = async (req, res) => {
         }
       } else {
         console.log("Unauthorized to delete");
-        if (api) {
+        if (api === true) {
           res.status(400).json({ error: "Not Authorized to do that" });
         } else {
           res.render("error", {
@@ -387,7 +387,7 @@ const delete_user = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    if (api) {
+    if (api === true) {
       res.status(500).json({ error: "Something went wrong!!" });
     } else {
       res.render("error", {
@@ -410,7 +410,7 @@ const change_role = async (req, res) => {
         await User.updateOne({ email: user_email }, { role: "admin" }),
         "\nUser is authorized as an Admin"
       );
-      if (api) {
+      if (api === true) {
         res
           .status(201)
           .json({ message: "User is authorized for admin's role" });
@@ -421,7 +421,7 @@ const change_role = async (req, res) => {
       }
     } else {
       console.log("User not found");
-      if (api) {
+      if (api === true) {
         res.status(400).json({ error: "User not found" });
       } else {
         res.render("error", {
@@ -433,7 +433,7 @@ const change_role = async (req, res) => {
     }
   } else {
     console.log("Unauthorized");
-    if (api) {
+    if (api === true) {
       res.status(400).json({ message: "Not Authorized to do that" });
     } else {
       res.render("error", {

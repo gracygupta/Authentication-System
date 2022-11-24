@@ -186,7 +186,7 @@ const resetEmail = async (req, res) => {
         subject: "Reset Password",
         text: " Do not share this link.",
         html:
-          '<p>Click <a href="http://192.168.88.244:8000/password/reset/' +
+          '<p>Click <a href="http://140.40.0.198:4000/password/reset/' +
           recovery_token +
           '">here</a> to reset your password</p>',
       };

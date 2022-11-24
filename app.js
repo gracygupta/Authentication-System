@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const nodemailer = require("nodemailer");
 const cookieParser = require("cookie-parser");
 require("./db/conn");
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 const auth = require("./middleware/auth");
 
 const app = express();
@@ -23,6 +23,10 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
+//home route
+app.get("/", function (req, res) {
+  res.render("home");
+});
 //serves signup page
 app.get("/signup", function (req, res) {
   res.render("signup");
